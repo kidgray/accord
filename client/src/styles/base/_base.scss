@@ -1,0 +1,62 @@
+/*
+    Setting font-size to 62.5% allows for base-10 conversions from rem to
+    px, i.e. 1rem = 10px, 1.6rem = 16px, etc...
+*/
+html {
+    font-size: 62.5%
+}
+
+/* 
+    Restore all the DOM elements to their default sizes based on the conversion
+    factor we set up above. If we don't do this, the ENTIRE app will shrink to
+    62.5% of its default size.
+*/
+
+body {
+    font-size: 1.6rem; /* 16px */
+}
+
+h1 {
+    font-size: 2.4rem; /* 24px */
+}
+
+h2 {
+    font-size: 2.2rem; /* 22px */
+}
+
+h3 {
+    font-size: 1.8rem; /* 18px */
+}
+
+h4 {
+    font-size: 1.6rem; /* 16px */
+}
+
+h5 {
+    font-size: 1.2rem; /* 12px */
+}
+
+h6 {
+    font-size: 1rem; /* 10px */
+}
+
+/* 
+    Make the cursor change when hovering over an active button,
+    and make sure it doesn't change when hovering over a disabled one
+*/ 
+
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    cursor: default;
+}
+
+/* 
+    Remove underlining from hyperlinks 
+*/
+
+a {
+    text-decoration: none;
+}
