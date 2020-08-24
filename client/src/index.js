@@ -6,12 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "shards-ui/dist/css/shards.min.css";
 import './styles/styles.scss';
 
-const App = () => {
-    return (
-        <div>
-            <h1>Hello from React!</h1>
-        </div>
-    )
-};
+// COMPONENTS & PAGES
+import ApolloChatApp from './components/index.jsx';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<ApolloChatApp />, document.getElementById('root'));
