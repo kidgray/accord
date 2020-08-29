@@ -6,9 +6,21 @@ const typeDefs = gql`
         username: String!
         email: String!
     }
+    
+    input UserInfo {
+        username: String!
+        password: String!
+        confirmPassword: String!
+        email: String!
+    }
 
     type Query {
         getUsers: [User]!
+        login(username: String!, password: String!): User!
+    }
+
+    type Mutation {
+        register(userInfo: UserInfo): User!
     }
 `;
 

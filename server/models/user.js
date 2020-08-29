@@ -19,10 +19,23 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: true
     },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true
+      unique: true,
+      validate: {
+        isEmail: {
+          args: true,
+          msg: 'Invalid email address!'
+        }
+      }
+    },
+    imageUrl: {
+      type: DataTypes.STRING
     }
   }, {
     sequelize,
