@@ -9,7 +9,11 @@ const typeDefs = require('./graphql/typeDefs');
 const resolvers = require('./graphql/resolvers/index');
 
 // Instantiate the GraphQL Server
-const server = new GraphQLServer({ typeDefs, resolvers });
+const server = new GraphQLServer({ 
+    typeDefs, 
+    resolvers,
+    context: ctx => ctx
+});
 
 // Start the GraphQL Server
 server.start(({ 

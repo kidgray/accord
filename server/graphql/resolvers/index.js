@@ -1,5 +1,10 @@
 const bcrypt = require('bcryptjs');
 const { UserInputError, AuthenticationError } = require('apollo-server');
+const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
+
+// JWT secret value
+const { JWT_SECRET } = require('../../config/env.json');
 
 // Import Sequelize Models
 const { User } = require('../../models/index.js');
@@ -7,15 +12,46 @@ const { User } = require('../../models/index.js');
 // Resolvers for the queries/mutations
 const resolvers = {
     Query: {
-        getUsers: async () => {
+        getUsers: async (_, args, context) => {
             try {
+                let user;
+
+                // Check the headers for the authorization header. Make sure context.req 
+                // exists first, just in case
+                if (context.request && context.request.headers.authorization) {
+                    // We only need the actual jwt string, which is everything that comes
+                    // after 'Bearer ' in the authorization property of the header
+                    const token = context.request.headers.authorization.split('Bearer ')[1];
+    
+                    // Use the Secret to verify that the JWT token we extracted was issued
+                    // by this server
+                    jwt.verify(token, JWT_SECRET, (err, decodedToken) => {
+                        if (err) {
+                            throw new AuthenticationError('Unauthenticated user.');
+                        }
+    
+                        // The decoded token will contain whatever we put into the token
+                        // using the sign() method; in this case, the username
+                        user = decodedToken;
+                    });
+                }
+
                 // Retrieve all the users in the DB
-                const users = await User.findAll();
+                const users = await User.findAll({
+                    // Make sure we do NOT list the user that is 
+                    // making the request in the list of results
+                    where: { 
+                        username: { 
+                            [Op.ne]: user.username
+                        }
+                    }
+                });
 
                 // Return the list of users 
                 return users;
             } catch (err) {
                 console.log(err);
+                throw err;
             }
 
             return users;
@@ -32,8 +68,14 @@ const resolvers = {
                 if (username.trim() === '') {
                     errors.username = "Username field must not be empty!";
                 }
-                if (password.trim() === '') {
+                if (password === '') {
                     errors.password = "Password field must not be empty!";
+                }
+
+                // If either the username or password fields were left empty,
+                // throw an error
+                if (Object.keys(errors).length > 0) {
+                    throw new UserInputError('Invalid input', { errors });
                 }
 
                 // If the account with the username provided, if one exists
@@ -42,6 +84,8 @@ const resolvers = {
                 // If an account with the specified username DOESN'T exist
                 if (!user) {
                     errors.username = 'An account with the specified username does not exist.';
+
+                    // Throw an error indicating that no user account with the specified username was found
                     throw new UserInputError('User not found', { errors });
                 }
                 
@@ -54,8 +98,25 @@ const resolvers = {
                     throw new AuthenticationError('Incorrect password.', { errors });
                 }
 
-                // If no errors occurred and passwords match, then return the user
-                return user;
+                // If the user entered the correct password,
+                // issue a token
+                const token = jwt.sign({
+                    username
+                }, JWT_SECRET, { expiresIn: '1h' });
+
+                // Add the token to the user object
+                user.token = token;
+
+                // If no errors occurred and passwords match, then return the user.
+                return {
+                    // We need to return a JSON object. When you just return the user object,
+                    // this is done automatically, but if you return anything else (like a new object
+                    // inside of which you spread another object, i.e. what I'm doing here) you need to
+                    // do it manually
+                    ...user.toJSON(),
+                    createdAt: user.createdAt.toISOString(),
+                    token
+                }
             }
             catch (err) {
                 console.log(err);
@@ -89,14 +150,6 @@ const resolvers = {
                 if (email.trim() === '') {
                     errors.email = "Email field must not be empty!";
                 }
-
-                // Check whether a record with the specified username/email address already exist
-                // const userByUsername = await User.findOne({ where: { username } });
-                // const userByEmail = await User.findOne({ where: { email } });
-
-                // If a user with that username already exists
-                // if (userByUsername) errors.username = "An account with that username already exists.";
-                // if (userByEmail) errors.email = "An account with that email address already exists.";
 
                 // If there were any errors
                 if (Object.keys(errors).length > 0) {

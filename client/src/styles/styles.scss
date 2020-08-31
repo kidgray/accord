@@ -2,3 +2,6 @@
 @import '../../node_modules/bootstrap/scss/bootstrap.scss';
 @import './base/_base.scss';
 @import './base/_settings.scss';
+
+// COMPONENT STYLES & SETTINGS
+@import '../pages/register/register-page.styles.scss';

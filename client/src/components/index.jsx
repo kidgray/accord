@@ -1,8 +1,14 @@
 import React from 'react';
+import { Container, Row, Col, Form } from 'react-bootstrap';
+
+// COMPONENTS & PAGES
+import RegisterPage from '../pages/register/register-page.component.jsx';
 
 const ApolloChatApp = () => {
     return (
-        <h1>Hello world!</h1>
+        <Container>
+            <RegisterPage />
+        </Container>
     );
 };
 
