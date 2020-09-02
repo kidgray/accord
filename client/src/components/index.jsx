@@ -1,10 +1,12 @@
 import React from 'react';
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
 import { createHttpLink } from 'apollo-link-http';
-import { Container, Row, Col, Form } from 'react-bootstrap';
 
 // COMPONENTS & PAGES
 import RegisterPage from '../pages/register/register-page.component.jsx';
+
+// ROUTERS
+import AppRouter from '../routers/AppRouter.js';
 
 // HTTP Link for use with the Apollo Client
 const httpLink = createHttpLink({
@@ -20,7 +22,7 @@ const client = new ApolloClient({
 const ApolloChatApp = () => {
     return (
         <ApolloProvider client={client}>
-            <RegisterPage />
+            <AppRouter />
         </ApolloProvider>
     );
 };

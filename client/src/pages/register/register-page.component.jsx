@@ -142,6 +142,6 @@ const RegisterPage = () => {
             </Row>
         </Container>
     )
-}
+};
 
 export default RegisterPage;
