@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Button, Form, FormControl } from 'react-bootstrap';
 import { gql, useMutation } from '@apollo/client';
 
-const RegisterPage = () => {
+const RegisterPage = (props) => {
     // State Hook for the registration form fields
-    const [ registrationInfo, setRegistrationInfo ] = useState({
+    const [registrationInfo, setRegistrationInfo] = useState({
         username: "",
         email: "",
         password: "",
@@ -12,7 +12,7 @@ const RegisterPage = () => {
     });
 
     // State Hook for errors that may occur during registration
-    const [ errors, setErrors ] = useState({});
+    const [errors, setErrors] = useState({});
 
     // GraphQL MUTATIONS
     const REGISTER_USER = gql`
@@ -36,9 +36,10 @@ const RegisterPage = () => {
     `;
 
     // useMutation hook returns the mutation execution function and object with mutation state variables
-    const [ registerUser, { loading }] = useMutation(REGISTER_USER, {
+    const [registerUser, { loading }] = useMutation(REGISTER_USER, {
         update: (_, result) => {
-            console.log(result);
+            // Redirect user to login page after a successful registration
+            props.history.push('/login');
         },
         onError: (err) => {
             // Populate the errors state variable
@@ -135,7 +136,7 @@ const RegisterPage = () => {
                         </Form.Group>
 
                         <Button variant="primary" type="submit" disabled={loading}>
-                            { loading ? 'Loading...' : 'Register!' }
+                            { loading ? 'Loading...' : 'Register' }
                         </Button>
                     </Form>
                 </Col>
