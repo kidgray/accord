@@ -9,6 +9,13 @@ const typeDefs = gql`
         token: String
     }
     
+    type Message {
+        uuid: String!
+        from: String!
+        to: String!
+        content: String!
+    }
+
     input UserInfo {
         username: String!
         password: String!
@@ -23,6 +30,7 @@ const typeDefs = gql`
 
     type Mutation {
         register(userInfo: UserInfo): User!
+        sendMessage(to: String!, content: String!): Message!
     }
 `;
 

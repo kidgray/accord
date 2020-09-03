@@ -8,11 +8,13 @@ const { sequelize } = require('./models/index');
 const typeDefs = require('./graphql/typeDefs');
 const resolvers = require('./graphql/resolvers/index');
 
+const contextMiddleware = require('./utils/contextMiddleware');
+
 // Instantiate the GraphQL Server
 const server = new GraphQLServer({ 
     typeDefs, 
     resolvers,
-    context: ctx => ctx
+    context: contextMiddleware
 });
 
 // Start the GraphQL Server

@@ -7,33 +7,18 @@ const { Op } = require('sequelize');
 const { JWT_SECRET } = require('../../config/env.json');
 
 // Import Sequelize Models
-const { User } = require('../../models/index.js');
+const { Message, User } = require('../../models/index.js');
 
 // Resolvers for the queries/mutations
 const resolvers = {
     Query: {
-        getUsers: async (_, args, context) => {
+        // Destructure the user object from the context argument, which
+        // is the one right after args. This is easier than having to refactor
+        // the code to say context.user everywhere
+        getUsers: async (_, args, { user }) => {
             try {
-                let user;
-
-                // Check the headers for the authorization header. Make sure context.req 
-                // exists first, just in case
-                if (context.request && context.request.headers.authorization) {
-                    // We only need the actual jwt string, which is everything that comes
-                    // after 'Bearer ' in the authorization property of the header
-                    const token = context.request.headers.authorization.split('Bearer ')[1];
-    
-                    // Use the Secret to verify that the JWT token we extracted was issued
-                    // by this server
-                    jwt.verify(token, JWT_SECRET, (err, decodedToken) => {
-                        if (err) {
-                            throw new AuthenticationError('Unauthenticated user.');
-                        }
-    
-                        // The decoded token will contain whatever we put into the token
-                        // using the sign() method; in this case, the username
-                        user = decodedToken;
-                    });
+                if (!user) {
+                    throw new AuthenticationError("Unathenticated user.");
                 }
 
                 // Retrieve all the users in the DB
@@ -177,6 +162,47 @@ const resolvers = {
                 }
 
                 throw new UserInputError('Invalid input.', { errors });
+            }
+        },
+        sendMessage: async (_, args, { user }) => {
+            try {
+                if (!user) {
+                    // If there's no user object in the context, that means
+                    // the user isn't logged in
+                    throw new AuthenticationError("Unathenticated user.");
+                }
+
+                // Look for intended recipient of the user's message in the database,
+                // and store it if they exist
+                const recipient = await User.findOne({ where: { username: args.to }});
+
+                // If the user's intended recipient doesn't exist in the DB, throw an error
+                if (!recipient) {
+                    throw new UserInputError("User not found.");
+                }
+                // Otherwise, check whether the user is trying to send themselves a message
+                else if (recipient.username === user.username) {
+                    throw new UserInputError("You may not message yourself.");
+                }
+
+                // If the user is trying to send an empty message
+                if (args.content.trim() === '') {
+                    throw new UserInputError("Cannot send an empty message.");
+                }
+
+                // If the user's intended recipient exists, create and send the message
+                const message = await Message.create({
+                    from: user.username,
+                    to: args.to,
+                    content: args.content
+                });
+
+                // Return the message that we just sent as the result of the mutation
+                return message;
+            }
+            catch (err) {
+                console.log(err);
+                throw err;
             }
         }
     }
