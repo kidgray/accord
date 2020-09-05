@@ -4,6 +4,7 @@
 @import './base/_settings.scss';
 
 // COMPONENT STYLES & SETTINGS
+@import '../components/menu-bar/menu-bar.styles.scss';
 @import '../pages/register/register-page.styles.scss';
 @import '../pages/not-found/not-found-page.styles.scss';
 @import '../pages/login/login-page.styles.scss';

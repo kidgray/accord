@@ -8,15 +8,18 @@ import LoginPage from '../pages/login/login-page.component.jsx';
 import RegisterPage from '../pages/register/register-page.component.jsx';
 import NotFoundPage from '../pages/not-found/not-found-page.component.jsx';
 
+// UTILS
+import DynamicRoute from '../utils/DynamicRoute';
+
 const AppRouter = () => {
     return (
         <BrowserRouter>
             <MenuBar />
             <Switch>
-                <Route exact path='/home' component={HomePage} />
+                <DynamicRoute exact path='/home' component={HomePage} authenticated />
                 <Redirect exact from="/" to="/home" />
-                <Route exact path="/login" component={LoginPage} />
-                <Route exact path="/register" component={RegisterPage} />
+                <DynamicRoute exact path="/login" component={LoginPage} guest />
+                <DynamicRoute exact path="/register" component={RegisterPage} guest />
                 <Route component={NotFoundPage} />
             </Switch>
         </BrowserRouter>

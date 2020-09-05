@@ -1,13 +1,42 @@
 import React, { createContext, useReducer, useContext } from 'react';
+import jwtDecode from 'jwt-decode';
 
 // These will be used to pass the Authentication State and
 // Authentication Dispatch function (for updating the state)
 const AuthStateContext = React.createContext();
 const AuthDispatchContext = React.createContext();
 
+// Attempt to retrieve JWT token from local storage
+// Basically, check if a user is logged in
+const token = localStorage.getItem('token');
+
+// This will be set to the user if there is a user logged in
+// (i.e. if a token exists), or remain null if there is no token
+let user;
+
+// If there was a token, there's a user logged in
+if (token) {
+    // Decode the JWT token
+    const decodedToken = jwtDecode(token);
+
+    // Get token's expiration time. Note that
+    // decodedToken.exp gives us the expiration time in seconds;
+    // we need milliseconds, so multiply by 1000
+    const expiresAt = new Date(decodedToken.exp * 1000);
+
+    // Check whether the current token is expired
+    if (new Date() > expiresAt) {
+        localStorage.removeItem('token');
+    }
+    else {
+        // decodedToken contains our user object
+        user = decodedToken;
+    }
+}
+
 // Initial State for the useReducer hook
 const initialState = {
-    user: null
+    user
 };
 
 // Reducer function for the useReducer Hook
@@ -24,6 +53,9 @@ const authReducer = (state, action) => {
                 user: action.payload
             }
         case 'LOGOUT':
+            // Delete the user's JWT token from local storage
+            localStorage.removeItem('token');
+        
             return {
                 ...state,
                 user: null
