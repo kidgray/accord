@@ -3,6 +3,9 @@ import { Button, Container, Row, Col, Form, FormControl } from 'react-bootstrap'
 import { useLazyQuery, gql } from '@apollo/client';
 import { Link } from 'react-router-dom';
 
+// CUSTOM HOOKS
+import { useAuthDispatch } from '../../context/auth.js';
+
 // GraphQL QUERY
 const LOGIN_USER = gql`
     query login(
@@ -31,23 +34,25 @@ const LoginPage = (props) => {
     // State Hook for errors that may occur during login
     const [errors, setErrors] = useState({});
 
+    // Custom Hook that returns the current Authentication dispatch function
+    const dispatch = useAuthDispatch();
+
     // useLazyQuery returns a "query execution function" that
     // allows for manual execution of a query. This permits the
     // use of a query inside of a handler function (such as handleSubmit)
     const [loginUser, { loading }] = useLazyQuery(LOGIN_USER, {
         onCompleted: (data) => {
-            console.log(data);
-
-            // Store user's JWT token in Local Storage so that refreshing the page
-            // doesn't "log the user out"
-            localStorage.setItem('token', data.login.token);
+            // Dispatch an action (object w/ action type and payload) that sets
+            // our authentication state to "logged in"
+            dispatch({
+                type: "LOGIN",
+                payload: data.login
+            });
 
             // Redirect the user to the Home Page on successful login
             props.history.push('/home');
         },
         onError: (err) => {
-            console.log(err);
-
             // Populate the errors object
             setErrors(err.graphQLErrors[0].extensions.errors);
         },

@@ -2,11 +2,11 @@ import React from 'react';
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
 import { createHttpLink } from 'apollo-link-http';
 
-// COMPONENTS & PAGES
-import RegisterPage from '../pages/register/register-page.component.jsx';
-
 // ROUTERS
 import AppRouter from '../routers/AppRouter.js';
+
+// CONTEXTS
+import { AuthProvider } from '../context/auth.js';
 
 // HTTP Link for use with the Apollo Client
 const httpLink = createHttpLink({
@@ -22,7 +22,9 @@ const client = new ApolloClient({
 const ApolloChatApp = () => {
     return (
         <ApolloProvider client={client}>
-            <AppRouter />
+            <AuthProvider>
+                <AppRouter />
+            </AuthProvider>
         </ApolloProvider>
     );
 };

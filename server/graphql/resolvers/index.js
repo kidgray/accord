@@ -10,6 +10,9 @@ const resolvers = {
     Mutation: {
         ...userResolvers.Mutation,
         ...messageResolvers.Mutation
+    },
+    Message: {
+        createdAt: (parent) => parent.createdAt.toISOString()
     }
 };
 

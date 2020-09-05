@@ -15,10 +15,6 @@ module.exports = (context) => {
         // Use the Secret to verify that the JWT token we extracted was issued
         // by this server
         jwt.verify(token, JWT_SECRET, (err, decodedToken) => {
-            if (err) {
-                // throw new AuthenticationError('Unauthenticated user.');
-            }
-        
             // The decoded token will contain whatever we put into the token
             // using the sign() method; in this case, the username
             context.user = decodedToken;

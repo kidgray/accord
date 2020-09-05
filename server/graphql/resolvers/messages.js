@@ -1,16 +1,61 @@
 const { UserInputError, AuthenticationError } = require('apollo-server');
+const { Op } = require('sequelize');
 
 // Import Sequelize Models
 const { Message, User } = require('../../models/index.js');
 
 // Resolvers for the queries/mutations
 const resolvers = {
+    Query: {
+        getMessages: async (_, args, { user }) => {
+            try {
+                // If there's no user object in the context, that means
+                // the user isn't logged in
+                if (!user) {
+                    throw new AuthenticationError("Unauthenticated user.");
+                }
+
+                // Get the other user in the chat
+                const sender = await User.findOne({
+                    where: {
+                        username: args.from
+                    }
+                });
+
+                // If the other user does not exist
+                if (!sender) {
+                    throw new UserInputError(`User ${sender.username} not found.`);
+                }
+
+                // Put the two users' usernames in an array so we can use them in queries
+                const usernames = [user.username, sender.username];
+
+                // Get all the messages between the two users
+                const messages = await Message.findAll({
+                    where: {
+                        from: { 
+                            [Op.in]:  usernames, 
+                        },
+                        to: {
+                            [Op.in]: usernames
+                        }
+                    },
+                    order: [ ['createdAt', 'DESC'] ]
+                });
+
+                // Return the messages as the result of the query
+                return messages;
+            }
+            catch (err) {
+                console.log(err);
+                throw err;
+            }
+        }
+    },
     Mutation: {
         sendMessage: async (_, args, { user }) => {
             try {
                 if (!user) {
-                    // If there's no user object in the context, that means
-                    // the user isn't logged in
                     throw new AuthenticationError("Unathenticated user.");
                 }
 
