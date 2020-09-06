@@ -7,7 +7,7 @@ const { Op } = require('sequelize');
 const { JWT_SECRET } = require('../../config/env.json');
 
 // Import Sequelize Models
-const { User } = require('../../models/index.js');
+const { Message, User } = require('../../models/index.js');
 
 // Resolvers for the queries/mutations
 const resolvers = {
@@ -21,8 +21,10 @@ const resolvers = {
                     throw new AuthenticationError("Unathenticated user.");
                 }
 
-                // Retrieve all the users in the DB
-                const users = await User.findAll({
+                // Retrieve all the users in the DB EXCEPT the current user
+                let users = await User.findAll({
+                    // Select the attributes we want to retrieve from the DB
+                    attributes: ['username', 'imageUrl', 'createdAt'],
                     // Make sure we do NOT list the user that is 
                     // making the request in the list of results
                     where: { 
@@ -30,6 +32,31 @@ const resolvers = {
                             [Op.ne]: user.username
                         }
                     }
+                });
+                
+                // Retrieve all messages to and from the current user
+                // so we can find the latest one
+                const allUserMessages = await Message.findAll({
+                    where: {
+                        [Op.or]: [{ from: user.username }, { to: user.username }]
+                    },
+                    order: [ ['createdAt', 'DESC'] ]
+                });
+
+                // For each of the other users, find the latest message that was sent to them
+                users = users.map((otherUser) => {
+                    const latestMessage = allUserMessages.find(
+                        // Note that the FIRST message we find that fulfills these conditions must
+                        // be the latest message, since we sorted the messages in DESCENDING order
+                        // according to their createdAt timestamp
+                        (message) => message.from === otherUser.username || message.to === otherUser.username
+                    );
+
+                    // Assign the other user's latest message to their user object
+                    otherUser.latestMessage = latestMessage;
+
+                    // Return the updated otherUser object
+                    return otherUser;
                 });
 
                 // Return the list of users 

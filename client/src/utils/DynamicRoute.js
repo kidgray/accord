@@ -16,7 +16,7 @@ const DynamicRoute = (props) => {
     // If the user is logged in but trying to access either the login
     // page or the register page
     else if (props.guest && user) {
-        // Redirect the user to the home page
+        // Redirect the user to the home page (i.e. the chat page)
         return <Redirect to="/home" />
     }
     // Otherwise, simply a Route as-is

@@ -27,7 +27,7 @@ const MenuBar = () => {
     };
     
     return (
-        <Navbar bg="light" expand="lg">
+        <Navbar bg="dark" variant="dark" expand="lg">
             <Navbar.Brand className="navbar-brand" href="/login"> Accord </Navbar.Brand>
 
             <Nav className="mr-auto">
