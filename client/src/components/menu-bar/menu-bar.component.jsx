@@ -2,13 +2,9 @@ import React, { Fragment } from 'react';
 import { Navbar, Nav } from 'react-bootstrap';
 
 // HOOKS
-import { useHistory } from 'react-router-dom';
 import { useAuthDispatch, useAuthState } from '../../context/auth.js';
 
 const MenuBar = () => {
-    // We will need history so we can redirect on logout
-    const history = useHistory();
-
     // Custom Hook that allows us to access the current Authentication
     // State (i.e. whether the user is logged in or not)
     const authState = useAuthState();
@@ -22,8 +18,10 @@ const MenuBar = () => {
             type: "LOGOUT"
         });
 
-        // Redirect the user to the login page
-        history.push('/login');
+        // Redirect the user to the login page. Do not use the history prop/hook!
+        // That results in incorrect behavior on logout (logging in as a different user
+        // will still show the first user's messages)
+        window.location.href = '/login';
     };
     
     return (
