@@ -2,6 +2,10 @@ import React from 'react';
 import { gql, useQuery } from '@apollo/client';
 import { Col, Image } from 'react-bootstrap';
 
+import { useMessageDispatch, useMessageState } from '../../context/message.js';
+
+
+// GraphQL QUERIES
 const GET_USERS = gql`
     query getUsers {
         getUsers {
@@ -20,32 +24,53 @@ const GET_USERS = gql`
 `;
 
 const Users = () => {
+    // Custom Hooks for the Message context
+    const { users } = useMessageState();
+    const messageDispatch = useMessageDispatch();
+    const selectedUser = users?.find((user) => user.selected === true)?.username;
+
     // Execute the getUsers query with the useQuery hook
-    const { loading: usersLoading, data: usersData, error: usersError } = useQuery(GET_USERS);
+    const { loading: usersLoading, data: usersData } = useQuery(GET_USERS, {
+        onCompleted: (data) => {
+            messageDispatch({ type: 'SET_USERS', payload: data.getUsers });
+        },
+        onError: (err) => {
+            console.log(err);
+        }
+    });
 
     // This will contain the JSX for the "user list" section
     let usersMarkup;
 
     // If the getUsers query returned no results, or is still loading
-    if (!usersData || usersLoading) {
+    if (!users || usersLoading) {
         usersMarkup = <p>Loading . . .</p>
     }
     // Otherwise, if the query was successfully completed, but there 
     // are no other users
-    else if (!usersData.getUsers.length === 0) {
+    else if (!users.length === 0) {
         usersMarkup = <p>No users have joined yet.</p>
     }
     // Otherwise, render all the users
-    else if (usersData.getUsers.length > 0) {
-        usersMarkup = usersData.getUsers.map((user) => (
-            <div className="d-flex" key={user.username} onClick={() => setSelectedUser(user.username)}>
-                <Image className="mr-2 user-img" src={user.imageUrl} roundedCircle />
-                <div>
-                    <p className="text-success"> {user.username} </p>
-                    <p className="font-weight-light"> {user.latestMessage ? user.latestMessage.content : "You are now connected!"} </p>
+    else if (users.length > 0) {
+        usersMarkup = usersData.getUsers.map((user) => {
+            const selected = selectedUser === user.username;
+
+            return (
+                <div 
+                    className={`user-div ${selected && 'bg-white'}`}
+                    key={user.username} 
+                    onClick={() => messageDispatch({ type: "SET_SELECTED_USER", payload: user.username })}
+                    role="button"
+                >
+                    <Image className="mr-2 user-img" src={user.imageUrl} roundedCircle />
+                    <div>
+                        <p className="text-success"> {user.username} </p>
+                        <p className="font-weight-light"> {user.latestMessage ? user.latestMessage.content : "You are now connected!"} </p>
+                    </div>
                 </div>
-            </div>
-        ));
+            ); 
+        });
     }
 
     return (

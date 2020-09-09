@@ -22,8 +22,6 @@ const resolvers = {
                     }
                 });
 
-                console.log(sender);
-
                 // If the other user does not exist
                 if (!sender) {
                     throw new UserInputError(`User ${sender.username} not found.`);

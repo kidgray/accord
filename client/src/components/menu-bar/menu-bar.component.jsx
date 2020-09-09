@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Navbar, Nav } from 'react-bootstrap';
 
 // HOOKS
@@ -30,13 +30,17 @@ const MenuBar = () => {
         <Navbar bg="dark" variant="dark" expand="lg">
             <Navbar.Brand className="navbar-brand" href="/login"> Accord </Navbar.Brand>
 
-            <Nav className="mr-auto">
+            <Nav className="nav-links ml-auto">
                 {
                     authState.user
                     ? <Nav.Link onClick={logout}> Logout </Nav.Link>
-                    : <Nav.Link href="/login"> Login </Nav.Link>
+                    : (
+                        <Fragment>
+                            <Nav.Link href="/login"> Login </Nav.Link>
+                            <Nav.Link href="/register"> Register </Nav.Link>
+                        </Fragment>
+                    )
                 }
-                <Nav.Link className={authState.user && "hidden"} href="/register"> Register </Nav.Link>
             </Nav>
         </Navbar>
     )

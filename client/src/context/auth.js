@@ -3,8 +3,8 @@ import jwtDecode from 'jwt-decode';
 
 // These will be used to pass the Authentication State and
 // Authentication Dispatch function (for updating the state)
-const AuthStateContext = React.createContext();
-const AuthDispatchContext = React.createContext();
+const AuthStateContext = createContext();
+const AuthDispatchContext = createContext();
 
 // Attempt to retrieve JWT token from local storage
 // Basically, check if a user is logged in

@@ -9,6 +9,7 @@ import AppRouter from '../routers/AppRouter.js';
 
 // CONTEXTS
 import { AuthProvider } from '../context/auth.js';
+import { MessageProvider } from '../context/message.js';
 
 // HTTP Link for use with the Apollo Client
 const httpLink = createHttpLink({
@@ -41,7 +42,9 @@ const ApolloChatApp = () => {
     return (
         <ApolloProvider client={client}>
             <AuthProvider>
-                <AppRouter />
+                <MessageProvider>
+                    <AppRouter />
+                </MessageProvider>
             </AuthProvider>
         </ApolloProvider>
     );
