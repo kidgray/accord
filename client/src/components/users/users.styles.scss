@@ -1,7 +1,16 @@
 .user-div {
     display: flex;
+    justify-content: center;
 }
 
 .user-div:hover {
     background-color: rgb(250, 250, 250);
+}
+
+.user-img {
+    width: 5rem;
+    height: 5rem;
+    object-fit: cover;
+    border-radius: 50%;
+
 }

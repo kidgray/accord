@@ -58,13 +58,13 @@ const Users = () => {
 
             return (
                 <div 
-                    className={`user-div ${selected && 'bg-white'}`}
+                    className={`user-div justify-content-md-start ${selected && 'bg-white'}`}
                     key={user.username} 
                     onClick={() => messageDispatch({ type: "SET_SELECTED_USER", payload: user.username })}
                     role="button"
                 >
-                    <Image className="mr-2 user-img" src={user.imageUrl} roundedCircle />
-                    <div>
+                    <Image className="user-img" src={user.imageUrl} roundedCircle />
+                    <div className="d-none d-md-block ml-2">
                         <p className="text-success"> {user.username} </p>
                         <p className="font-weight-light"> {user.latestMessage ? user.latestMessage.content : "You are now connected!"} </p>
                     </div>
@@ -74,7 +74,7 @@ const Users = () => {
     }
 
     return (
-        <Col xs={4} className="user-list"> 
+        <Col xs={2} md={4} className="user-list"> 
             { usersMarkup } 
         </Col>
     );

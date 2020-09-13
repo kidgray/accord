@@ -1,6 +1,9 @@
-import React, { useEffect } from 'react';
-import { Col } from 'react-bootstrap';
-import { gql, useLazyQuery } from '@apollo/client';
+import React, { Fragment, useEffect, useState } from 'react';
+import { Col, Form } from 'react-bootstrap';
+import { gql, useLazyQuery, useMutation } from '@apollo/client';
+
+// COMPONENTS & PAGES
+import Message from '../message/message.component.jsx';
 
 // HOOKS
 import { useMessageDispatch, useMessageState } from '../../context/message.js';
@@ -18,7 +21,24 @@ const GET_MESSAGES = gql`
     }
 `;
 
+// GraphQL MUTATIONS
+const SEND_MESSAGE = gql`
+    mutation sendMessage($to: String!, $content: String!) {
+        sendMessage(to: $to, content: $content) {
+            uuid
+            from
+            to
+            content
+            createdAt
+        }
+    }
+`;
+
 const Messages = () => {
+    // State Hook for the content of the message box that
+    // can be used to send messages to the other users
+    const [content, setContent] = useState('');
+
     // Custom Hooks for using message context
     const { users } = useMessageState();
     const messageDispatch = useMessageDispatch();
@@ -33,6 +53,26 @@ const Messages = () => {
     const [getMessages, { loading: messagesLoading, data: messagesData, error: messagesError }] = useLazyQuery(GET_MESSAGES, {
         variables: {
             from: selectedUser?.username
+        }
+    });
+
+    // Mutation for sending messages to another user
+    const [sendMessage] = useMutation(SEND_MESSAGE, {
+        onCompleted: (data) => {
+            messageDispatch({ 
+                type: "ADD_MESSAGE", 
+                payload: {
+                    username: selectedUser?.username,
+                    message: data.sendMessage
+                } 
+            });
+        },
+        onError: (err) => {
+            console.log(err);
+        },
+        variables: {
+            to: selectedUser?.username,
+            content
         }
     });
 
@@ -60,31 +100,73 @@ const Messages = () => {
         }
     }, [messagesData]);
 
+    // Submit handler for the send message functionality
+    const submitMessage = (event) => {
+        // Prevent page reload upon form submission
+        event.preventDefault();
+
+        // If no message was entered, there's nothing to do
+        if (content === '') {
+            return;
+        }
+
+        // Otherwise, execute the mutation for sending 
+        // a message
+        sendMessage();
+    }
+
     // The Markup that will be displayed by this component is affected by whether
     // a user has been selected or not
     let selectedChatMarkup;
 
     // If we haven't selected a user yet (i.e. if there are no messages loaded or currently loading)
     if (!messages && !messagesLoading) {
-        selectedChatMarkup = <p> Select a user to chat with! </p>
+        selectedChatMarkup = <p className="info-text"> Select a user to chat with! </p>
     }
     // If a chatmate has been selected and their messages are currently loading
     else if (messagesLoading) {
-        selectedChatMarkup = <p> Loading . . . </p>
+        selectedChatMarkup = <p className="info-text"> Loading . . . </p>
     }
     // If we have messages to display
     else if (messages.length > 0) {
-        selectedChatMarkup = messages.map(message => (
-            <p key={message.uuid}> {message.content} </p>
+        selectedChatMarkup = messages.map((message, index) => (
+            <Fragment key={message.uuid}>
+                <Message message={message} />
+                
+                {index === messages.length - 1 && (
+                    <div className="invisible">
+                        <hr className="m-0" />
+                    </div>
+                )}
+            </Fragment>
         ));
     }
     else if (messages.length === 0) {
-        selectedChatMarkup = <p> You are now connected. Send a message! </p>
+        selectedChatMarkup = <p className="info-text"> You are now connected. Send a message! </p>
     }
     
     return (
-        <Col xs={8}>
-            { selectedChatMarkup }
+        <Col xs={10} md={8}>
+            <div className="d-flex flex-column-reverse messages-box">
+                { selectedChatMarkup }
+            </div>
+
+            <div>
+                {
+                    selectedUser &&
+                    <Form onSubmit={submitMessage}>
+                        <Form.Group>
+                            <Form.Control
+                                type="text"
+                                className="message-input rounded-pill"
+                                placeholder="Enter a message..."
+                                value={content}
+                                onChange={(event) => setContent(event.target.value)}
+                            />
+                        </Form.Group>
+                    </Form>
+                }
+            </div>
         </Col>
     );
 };

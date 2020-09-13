@@ -1,0 +1,26 @@
+.info-text {
+    color: rgba(0, 0, 0, 0.65);
+    margin: 0 0 2.5rem 0;
+    text-align: center;
+}
+
+.message-input {
+    border: none;
+    padding: 1.75rem;
+
+    &::placeholder {
+        color: rgba(0, 0, 0, 0.65);
+        font-size: 1.4rem;
+    }
+}
+
+.messages-box {
+    height: 50rem;
+    overflow-y: scroll;
+
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}

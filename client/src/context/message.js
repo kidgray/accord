@@ -11,7 +11,11 @@ const initialState = {
 
 const messageReducer = (state, action) => {
     // Temp copy of the array in state
-    let usersCopy; 
+    let usersCopy, userIndex; 
+
+    // Destructure the username, message (for ADD_MESSAGE)
+    // and messages (for SET_USER_MESSAGES) from the action payload
+    const { username, message, messages } = action.payload;
 
     switch (action.type) {
         case 'SET_USERS':
@@ -20,11 +24,9 @@ const messageReducer = (state, action) => {
                 users: action.payload
             };
         case 'SET_USER_MESSAGES':
-            const { username, messages } = action.payload;
-
             usersCopy = [...state.users];
 
-            const userIndex = usersCopy.findIndex((user) => user.username === username);
+            userIndex = usersCopy.findIndex((user) => user.username === username);
 
             usersCopy[userIndex] = { ...usersCopy[userIndex], messages }
 
@@ -42,6 +44,26 @@ const messageReducer = (state, action) => {
                 ...state,
                 users: usersCopy
             };
+        case 'ADD_MESSAGE':
+            usersCopy = [...state.users];
+
+            // Get the index of the user that is receiving the message
+            userIndex = usersCopy.findIndex((user) => user.username === username);
+            
+            // Create a copy of the user object to which we are adding a new msg
+            let userCopy = {
+                ...usersCopy[userIndex],
+                messages: [message, ...usersCopy[userIndex].messages]
+            };
+
+            // Add the modified copy of the user object to the copy of the array
+            // of user objects
+            usersCopy[userIndex] = userCopy;
+
+            return {
+                ...state,
+                users: usersCopy
+            }
         default:
             throw new Error(`Unknown action type: ${action.type}`);
     }
