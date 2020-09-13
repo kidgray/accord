@@ -8,7 +8,7 @@ const typeDefs = gql`
         createdAt: String!
         token: String
         latestMessage: Message
-        imageUrl: String!
+        imageUrl: String
     }
     
     type Message {
@@ -35,6 +35,10 @@ const typeDefs = gql`
     type Mutation {
         register(userInfo: UserInfo): User!
         sendMessage(to: String!, content: String!): Message!
+    }
+
+    type Subscription {
+        newMessage: Message!
     }
 `;
 

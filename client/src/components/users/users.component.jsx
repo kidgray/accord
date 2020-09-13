@@ -63,7 +63,7 @@ const Users = () => {
                     onClick={() => messageDispatch({ type: "SET_SELECTED_USER", payload: user.username })}
                     role="button"
                 >
-                    <Image className="user-img" src={user.imageUrl} roundedCircle />
+                    <Image className="user-img" src={user.imageUrl || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'} roundedCircle />
                     <div className="d-none d-md-block ml-2">
                         <p className="text-success"> {user.username} </p>
                         <p className="font-weight-light"> {user.latestMessage ? user.latestMessage.content : "You are now connected!"} </p>

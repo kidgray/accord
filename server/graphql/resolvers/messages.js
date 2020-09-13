@@ -1,4 +1,4 @@
-const { UserInputError, AuthenticationError } = require('apollo-server');
+const { AuthenticationError, UserInputError, withFilter } = require('apollo-server');
 const { Op } = require('sequelize');
 
 // Import Sequelize Models
@@ -53,7 +53,7 @@ const resolvers = {
         }
     },
     Mutation: {
-        sendMessage: async (_, args, { user }) => {
+        sendMessage: async (_, args, { user, pubsub }) => {
             try {
                 if (!user) {
                     throw new AuthenticationError("Unathenticated user.");
@@ -84,6 +84,9 @@ const resolvers = {
                     content: args.content
                 });
 
+                // Publish the addition of a message to the "new message" subscribers
+                pubsub.publish('NEW_MESSAGE', { newMessage: message });
+
                 // Return the message that we just sent as the result of the mutation
                 return message;
             }
@@ -91,6 +94,29 @@ const resolvers = {
                 console.log(err);
                 throw err;
             }
+        }
+    },
+    Subscription: {
+        newMessage: {
+            subscribe: withFilter(
+                (_, args, context) => {
+                    if (!context.user) throw new AuthenticationError('Unauthenticated user.');
+
+                    return context.pubsub.asyncIterator(['NEW_MESSAGE']);
+                },
+                (parent, _, context) => {
+                    // If the currently authenticated user is either the
+                    // sender or recipient of the new message 
+                    if (parent.newMessage.from === context.user.username ||
+                        parent.newMessage.to === context.user.username) {
+                            return true;
+                    }
+
+                    // Otherwise, we don't need to broadcast new messages to users
+                    // that aren't involved with that message
+                    return false;
+                }
+            )
         }
     }
 };

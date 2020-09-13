@@ -34,6 +34,9 @@ const SEND_MESSAGE = gql`
     }
 `;
 
+// GraphQL SUBSCRIPTIONS
+
+
 const Messages = () => {
     // State Hook for the content of the message box that
     // can be used to send messages to the other users
@@ -106,7 +109,7 @@ const Messages = () => {
         event.preventDefault();
 
         // If no message was entered, there's nothing to do
-        if (content === '') {
+        if (content.trim() === '') {
             return;
         }
 
@@ -155,7 +158,7 @@ const Messages = () => {
                 {
                     selectedUser &&
                     <Form onSubmit={submitMessage}>
-                        <Form.Group>
+                        <Form.Group className="d-flex align-items-center">
                             <Form.Control
                                 type="text"
                                 className="message-input rounded-pill"
@@ -163,6 +166,12 @@ const Messages = () => {
                                 value={content}
                                 onChange={(event) => setContent(event.target.value)}
                             />
+
+                            <i 
+                                className="fas fa-paper-plane fa-2x text-primary send-button" 
+                                onClick={submitMessage}
+                                role="button"
+                            ></i>
                         </Form.Group>
                     </Form>
                 }

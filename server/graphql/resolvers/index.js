@@ -11,9 +11,13 @@ const resolvers = {
         ...userResolvers.Mutation,
         ...messageResolvers.Mutation
     },
+    Subscription: {
+        ...userResolvers.Subscription,
+        ...messageResolvers.Subscription
+    },
     Message: {
         createdAt: (parent) => parent.createdAt.toISOString()
-    }
+    },
 };
 
 module.exports = resolvers;
