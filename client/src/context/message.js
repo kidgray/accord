@@ -53,7 +53,10 @@ const messageReducer = (state, action) => {
             // Create a copy of the user object to which we are adding a new msg
             let userCopy = {
                 ...usersCopy[userIndex],
-                messages: [message, ...usersCopy[userIndex].messages]
+                messages: usersCopy[userIndex].messages 
+                    ? [message, ...usersCopy[userIndex].messages] 
+                    : null,
+                latestMessage: message,
             };
 
             // Add the modified copy of the user object to the copy of the array

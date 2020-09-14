@@ -1,9 +1,8 @@
 import React from 'react';
-import { gql, useQuery } from '@apollo/client';
+import { gql, useLazyQuery, useQuery } from '@apollo/client';
 import { Col, Image } from 'react-bootstrap';
 
 import { useMessageDispatch, useMessageState } from '../../context/message.js';
-
 
 // GraphQL QUERIES
 const GET_USERS = gql`
@@ -36,7 +35,8 @@ const Users = () => {
         },
         onError: (err) => {
             console.log(err);
-        }
+        },
+        pollInterval: 100
     });
 
     // This will contain the JSX for the "user list" section

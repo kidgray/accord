@@ -50,7 +50,7 @@ const LoginPage = (props) => {
             });
 
             // Redirect the user to the Home Page on successful login
-            props.history.push('/home');
+            window.location.href = '/home';
         },
         onError: (err) => {
             // Populate the errors object

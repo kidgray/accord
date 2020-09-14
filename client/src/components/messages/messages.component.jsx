@@ -34,9 +34,6 @@ const SEND_MESSAGE = gql`
     }
 `;
 
-// GraphQL SUBSCRIPTIONS
-
-
 const Messages = () => {
     // State Hook for the content of the message box that
     // can be used to send messages to the other users
@@ -61,15 +58,6 @@ const Messages = () => {
 
     // Mutation for sending messages to another user
     const [sendMessage] = useMutation(SEND_MESSAGE, {
-        onCompleted: (data) => {
-            messageDispatch({ 
-                type: "ADD_MESSAGE", 
-                payload: {
-                    username: selectedUser?.username,
-                    message: data.sendMessage
-                } 
-            });
-        },
         onError: (err) => {
             console.log(err);
         },
@@ -78,6 +66,7 @@ const Messages = () => {
             content
         }
     });
+
 
     // Effect hook that will load a conversation with another user
     // whenever a user is selected from the user list (left-hand side of the chat). Should
@@ -112,6 +101,11 @@ const Messages = () => {
         if (content.trim() === '') {
             return;
         }
+
+        // At this point, we can queue up our content state mutator
+        // function to clear the content of the message box, since
+        // we will send the message successfully anyway
+        setContent('');
 
         // Otherwise, execute the mutation for sending 
         // a message
