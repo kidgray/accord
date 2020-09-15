@@ -19,6 +19,14 @@ const typeDefs = gql`
         createdAt: String!
     }
 
+    type Reaction {
+        content: String!
+        uuid: String!
+        Message: Message!
+        User: User!
+        createdAt: String!
+    }
+
     input UserInfo {
         username: String!
         password: String!
@@ -35,10 +43,12 @@ const typeDefs = gql`
     type Mutation {
         register(userInfo: UserInfo): User!
         sendMessage(to: String!, content: String!): Message!
+        reactToMessage(uuid: String!, content: String!): Reaction!
     }
 
     type Subscription {
         newMessage: Message!
+        newReaction: Reaction!
     }
 `;
 

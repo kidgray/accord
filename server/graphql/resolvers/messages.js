@@ -1,8 +1,8 @@
-const { AuthenticationError, UserInputError, withFilter } = require('apollo-server');
+const { AuthenticationError, ForbiddenError, UserInputError, withFilter } = require('apollo-server');
 const { Op } = require('sequelize');
 
 // Import Sequelize Models
-const { Message, User } = require('../../models/index.js');
+const { Message, Reaction, User } = require('../../models/index.js');
 
 // Resolvers for the queries/mutations
 const resolvers = {
@@ -94,6 +94,70 @@ const resolvers = {
                 console.log(err);
                 throw err;
             }
+        },
+        reactToMessage: async (_, { uuid, content }, { user, pubsub }) => {
+            try {
+                // These are the emojis that a user may react to a post with
+                const reactions = ['❤️', '😆', '😯', '😢', '😡', '👍', '👎'];
+
+                // Make sure the reaction passed in is one of the acceptable reactions
+                if (!reactions.includes(content)) {
+                    // If not, throw an error
+                    throw new UserInputError('Invalid reaction!');
+                }
+
+                // Get the user 
+                const username = user ? user.username : '';
+
+                // Check whether the user w/ the specified username
+                // exists in the DB; throw an error if it doesn't
+                user = await User.findOne({ where: { username }});
+                if (!user) throw new AuthenticationError('Unauthenticated user!');
+
+                // Check whether the message we're reacting to exists in the DB;
+                // throw an error if it doesn't
+                const message = await Message.findOne({ where: { uuid }});
+                if (!message) throw new UserInputError('Message not found!');
+
+                // A user is only allowed to react to a message if they either sent
+                // or received that message
+                if (message.from !== user.username && message.to !== user.username) {
+                    throw new ForbiddenError('Unauthorized');
+                }
+
+                // Otherwise, check whether the message already has the Reaction type we're trying to add
+                let reaction = await Reaction.findOne({
+                    where: { 
+                        messageId: message.id,
+                        userId: user.id
+                    }
+                });
+
+                // If the message already has that reaction, update it
+                if (reaction) {
+                    // Overwrite the old reaction
+                    reaction.content = content;
+
+                    // Save changes to DB
+                    await reaction.save();
+                }
+                else {
+                    // Reaction doesn't exist yet, so create it
+                    reaction = await Reaction.create({
+                        messageId: message.id,
+                        userId: user.id,
+                        content
+                    })
+                }
+
+                pubsub.publish('NEW_REACTION', { newReaction: reaction });
+
+                // Return the newly updated/created reaction as the result of the Mutation
+                return reaction;
+            }
+            catch (err) {
+                throw err;
+            }
         }
     },
     Subscription: {
@@ -102,7 +166,7 @@ const resolvers = {
                 (_, args, context) => {
                     if (!context.user) throw new AuthenticationError('Unauthenticated user.');
 
-                    return context.pubsub.asyncIterator(['NEW_MESSAGE']);
+                    return context.pubsub.asyncIterator('NEW_MESSAGE');
                 },
                 (parent, _, context) => {
                     // If the currently authenticated user is either the
@@ -117,7 +181,33 @@ const resolvers = {
                     return false;
                 }
             )
-        }
+        },
+        newReaction: {
+            subscribe: withFilter(
+                (_, args, context) => {
+                    if (!context.user) throw new AuthenticationError('Unauthenticated user.');
+
+                    return context.pubsub.asyncIterator('NEW_REACTION');
+                },
+                async (parent, _, context) => {
+                    // Get the message that the Reaction will be attached to
+                    const message = await parent.newReaction.getMessage();
+
+                    console.log(message);
+
+                    // If the currently authenticated user is either the
+                    // sender or recipient of the new reaction 
+                    if (message.from === context.user.username ||
+                        message.to === context.user.username) {
+                            return true;
+                    }
+
+                    // Otherwise, we don't need to broadcast new reactions to users
+                    // that aren't involved with that reactions
+                    return false;
+                }
+            )
+        },
     }
 };
 

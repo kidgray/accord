@@ -126,7 +126,6 @@ const resolvers = {
                     // inside of which you spread another object, i.e. what I'm doing here) you need to
                     // do it manually
                     ...user.toJSON(),
-                    createdAt: user.createdAt.toISOString(),
                     token
                 }
             }
