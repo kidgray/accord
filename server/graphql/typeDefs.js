@@ -17,13 +17,14 @@ const typeDefs = gql`
         to: String!
         content: String!
         createdAt: String!
+        reactions: [Reaction]
     }
 
     type Reaction {
         content: String!
         uuid: String!
-        Message: Message!
-        User: User!
+        message: Message!
+        user: User!
         createdAt: String!
     }
 

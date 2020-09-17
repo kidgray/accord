@@ -40,7 +40,8 @@ const resolvers = {
                             [Op.in]: usernames
                         }
                     },
-                    order: [ ['createdAt', 'DESC'] ]
+                    order: [ ['createdAt', 'DESC'] ],
+                    include: [{ model: Reaction, as: 'reactions' }]
                 });
 
                 // Return the messages as the result of the query
@@ -192,8 +193,6 @@ const resolvers = {
                 async (parent, _, context) => {
                     // Get the message that the Reaction will be attached to
                     const message = await parent.newReaction.getMessage();
-
-                    console.log(message);
 
                     // If the currently authenticated user is either the
                     // sender or recipient of the new reaction 

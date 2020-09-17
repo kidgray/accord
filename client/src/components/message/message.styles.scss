@@ -1,0 +1,25 @@
+.react-btn-popover {
+    height: 3.5rem;
+}
+
+.reaction-btn {
+    font-size: 1.5rem;
+    padding: 0 0.25rem 0 0.25rem;
+    transition: 0.25s;
+
+    &:hover {
+        font-size: 2rem;
+        text-decoration: none;
+    }
+
+    &:focus {
+        box-shadow: none;
+    }
+}
+
+.reactions-div {
+    position: absolute;
+    bottom: -1.9rem;
+    right: -0.25rem;
+    font-size: 1.25rem;
+}
