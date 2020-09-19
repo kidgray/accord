@@ -14,7 +14,7 @@ import { MessageProvider } from '../context/message.js';
 
 // HTTP Link for use with the Apollo Client
 let httpLink = createHttpLink({
-    uri: 'http://localhost:4000'
+    uri: '/'
 });
 
 // Authentication Link that will be chained to the HTTP Link
@@ -35,9 +35,12 @@ const authLink = setContext((_, { headers }) => {
 
 httpLink = authLink.concat(httpLink);
 
+// Get the host
+const host = window.location.host;
+
 // Web Socket Link for use with GraphQL Subscriptions
 const wsLink = new WebSocketLink({
-    uri: `ws://localhost:4000`,
+    uri: `ws://${host}/`,
     options: {
         reconnect: true,
         connectionParams: {

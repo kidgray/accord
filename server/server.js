@@ -1,6 +1,8 @@
 const { GraphQLServer } = require('graphql-yoga');
 const { ApolloServer } = require('apollo-server');
 
+require('dotenv').config();
+
 // Import instance of the sequelize Database
 const { sequelize } = require('./models/index');
 

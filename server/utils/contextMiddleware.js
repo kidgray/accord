@@ -4,10 +4,6 @@ const { PubSub } = require('apollo-server');
 // Publish/Subscribe primitive for notifying subscribers of events
 const pubsub = new PubSub();
 
-// JWT secret value
-const { JWT_SECRET } = require('../config/env.json');
-
-
 module.exports = (context) => {
     let token;
     
@@ -26,7 +22,7 @@ module.exports = (context) => {
     if (token) {
         // Use the Secret to verify that the JWT token we extracted was issued
         // by this server
-        jwt.verify(token, JWT_SECRET, (err, decodedToken) => {
+        jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
             // The decoded token will contain whatever we put into the token
             // using the sign() method; in this case, the username
             context.user = decodedToken;

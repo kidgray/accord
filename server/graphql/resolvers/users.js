@@ -3,9 +3,6 @@ const { UserInputError, AuthenticationError } = require('apollo-server');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 
-// JWT secret value
-const { JWT_SECRET } = require('../../config/env.json');
-
 // Import Sequelize Models
 const { Message, User } = require('../../models/index.js');
 
@@ -114,7 +111,7 @@ const resolvers = {
                 // issue a token
                 const token = jwt.sign({
                     username
-                }, JWT_SECRET, { expiresIn: '1h' });
+                }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
                 // Add the token to the user object
                 user.token = token;
