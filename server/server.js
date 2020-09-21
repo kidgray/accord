@@ -1,4 +1,3 @@
-const { GraphQLServer } = require('graphql-yoga');
 const { ApolloServer } = require('apollo-server');
 
 require('dotenv').config();
@@ -12,22 +11,19 @@ const resolvers = require('./graphql/resolvers/index');
 
 const contextMiddleware = require('./utils/contextMiddleware');
 
-// Instantiate the GraphQL Server
-const server = new GraphQLServer({ 
-    typeDefs, 
+const server = new ApolloServer({
+    typeDefs,
     resolvers,
-    context: contextMiddleware
+    context: contextMiddleware,
+    subscriptions: { path: '/' }
 });
 
-// Start the GraphQL Server
-server.start(({ 
-    port 
-}) => console.log(`Server listening at http://localhost:${port}`))
-.then(() => {
-    // authenticate() returns a Promise; we return that from this 
-    // then() block so as to avoid excessive nesting. The next then()
-    // will handle this Promise
-    return sequelize.authenticate();
-})
-.then(() => console.log(`Database successfully authenticated and connected!`))
-.catch((err) => console.log(`Error: ${err}`));      // If the database failed to connect for whatever reason
+server.listen().then(({ url, subscriptionsUrl }) => {
+    console.log(`Server ready at ${url}`);
+    console.log(`Subscriptions ready at ${subscriptionsUrl}`);
+
+    sequelize
+        .authenticate()
+        .then(() => console.log(`Database successfully connected & authenticated!`))
+        .catch((err) => console.log(err))
+});

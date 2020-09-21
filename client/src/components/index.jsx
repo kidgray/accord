@@ -12,10 +12,21 @@ import AppRouter from '../routers/AppRouter.js';
 import { AuthProvider } from '../context/auth.js';
 import { MessageProvider } from '../context/message.js';
 
+// Get the host
+const host = window.location.host;
+
+/*
 // HTTP Link for use with the Apollo Client
 let httpLink = createHttpLink({
-    uri: '/'
+    uri: `/graphql/`
 });
+*/
+
+
+let httpLink = createHttpLink({
+    uri: 'http://localhost:4000/graphql/'
+})
+
 
 // Authentication Link that will be chained to the HTTP Link
 // This appends an Authorization header to every HTTP request made
@@ -35,12 +46,9 @@ const authLink = setContext((_, { headers }) => {
 
 httpLink = authLink.concat(httpLink);
 
-// Get the host
-const host = window.location.host;
-
 // Web Socket Link for use with GraphQL Subscriptions
 const wsLink = new WebSocketLink({
-    uri: `ws://${host}/`,
+    uri: `ws://${host}/graphql/`,
     options: {
         reconnect: true,
         connectionParams: {

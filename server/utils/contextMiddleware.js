@@ -9,10 +9,10 @@ module.exports = (context) => {
     
     // Check the headers for the authorization header. Make sure context.req 
     // exists first, just in case
-    if (context.request && context.request.headers.authorization) {
+    if (context.req && context.req.headers.authorization) {
         // We only need the actual jwt string, which is everything that comes
         // after 'Bearer ' in the authorization property of the header
-        token = context.request.headers.authorization.split('Bearer ')[1];
+        token = context.req.headers.authorization.split('Bearer ')[1];
     }
     else if (context.connection && context.connection.context.Authorization) {
         token = context.connection.context.Authorization.split('Bearer ')[1];
